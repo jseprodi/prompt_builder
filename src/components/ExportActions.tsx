@@ -28,7 +28,7 @@ export function ExportActions({ agentType, content, disabled }: ExportActionsPro
   };
 
   return (
-    <div className="row" aria-label="Export options" style={{ flex: 1 }}>
+    <div className="export-actions row" aria-label="Export options">
       <button
         type="button"
         className={`button secondary no-caps ${disabledClass}`}

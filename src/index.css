@@ -56,6 +56,11 @@ body {
   gap: 0.4rem;
 }
 
+.footer-actions > button,
+.export-actions {
+  flex: 0 0 auto;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -249,5 +254,5 @@ button.button {
   margin: 0;
   font-size: 0.72rem;
   color: var(--green);
-  width: 100%;
+  flex-basis: 100%;
 }
