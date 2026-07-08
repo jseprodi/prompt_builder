@@ -16,6 +16,41 @@ export function downloadMarkdown(content: string, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
+function copyWithExecCommand(content: string): boolean {
+  const textarea = document.createElement("textarea");
+  textarea.value = content;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  textarea.setSelectionRange(0, content.length);
+
+  let success = false;
+  try {
+    success = document.execCommand("copy");
+  } catch {
+    success = false;
+  }
+
+  document.body.removeChild(textarea);
+  return success;
+}
+
 export async function copyToClipboard(content: string): Promise<void> {
-  await navigator.clipboard.writeText(content);
+  // Prefer execCommand first — it must run synchronously during the click
+  // handler, which matters inside Kontent.ai's embedded iframe.
+  if (copyWithExecCommand(content)) {
+    return;
+  }
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(content);
+    return;
+  }
+
+  throw new Error("Copy failed");
 }
