@@ -10,6 +10,7 @@ interface ExportActionsProps {
 
 export function ExportActions({ agentType, content, disabled }: ExportActionsProps) {
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const disabledClass = disabled ? "disabled" : "";
 
   const handleCopy = async () => {
     try {
@@ -27,15 +28,25 @@ export function ExportActions({ agentType, content, disabled }: ExportActionsPro
   };
 
   return (
-    <div className="export-actions" aria-label="Export options">
-      <button type="button" className="btn btn-secondary" onClick={() => void handleCopy()} disabled={disabled}>
+    <div className="row" aria-label="Export options" style={{ flex: 1 }}>
+      <button
+        type="button"
+        className={`button secondary no-caps ${disabledClass}`}
+        onClick={() => void handleCopy()}
+        disabled={disabled}
+      >
         Copy
       </button>
-      <button type="button" className="btn btn-primary" onClick={handleDownload} disabled={disabled}>
+      <button
+        type="button"
+        className={`button green no-caps ${disabledClass}`}
+        onClick={handleDownload}
+        disabled={disabled}
+      >
         Export .md
       </button>
       {copyStatus ? (
-        <p className="status-message" role="status" aria-live="polite">
+        <p className="copy-status" role="status" aria-live="polite">
           {copyStatus}
         </p>
       ) : null}

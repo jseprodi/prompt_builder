@@ -14,6 +14,10 @@ function formatDate(iso: string): string {
   });
 }
 
+function agentStatusClass(agentType: AgentType): string {
+  return agentType === "aiko" ? "status blue" : "status purple";
+}
+
 function agentLabel(agentType: AgentType): string {
   return agentType === "aiko" ? "Aiko" : "Expert Agent";
 }
@@ -24,33 +28,37 @@ export function PromptHistory({ entries, onLoad, onRemove, onClear }: PromptHist
   }
 
   return (
-    <section className="history-panel" aria-labelledby="history-heading">
-      <div className="history-header">
-        <h2 id="history-heading" className="section-title">
+    <section className="section section-compact" aria-labelledby="history-heading">
+      <div className="row-spread">
+        <h2 id="history-heading" className="subheading">
           Recent prompts
         </h2>
-        <button type="button" className="btn btn-text" onClick={onClear}>
+        <button type="button" className="button secondary no-caps" onClick={onClear}>
           Clear all
         </button>
       </div>
-      <p className="history-note">
-        Saved locally in your browser only — not shared or synced across devices.
-      </p>
+      <p className="muted">Saved locally in your browser only — not shared or synced.</p>
       <ul className="history-list">
         {entries.map((entry) => (
           <li key={entry.id} className="history-item">
-            <div className="history-item-meta">
-              <span className="history-badge">{agentLabel(entry.agentType)}</span>
-              <time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time>
+            <div className="row" style={{ justifyContent: "space-between" }}>
+              <span className={agentStatusClass(entry.agentType)}>{agentLabel(entry.agentType)}</span>
+              <time className="history-meta" dateTime={entry.createdAt}>
+                {formatDate(entry.createdAt)}
+              </time>
             </div>
             <p className="history-label">{entry.label}</p>
-            <div className="history-actions">
-              <button type="button" className="btn btn-secondary btn-small" onClick={() => onLoad(entry)}>
+            <div className="row">
+              <button
+                type="button"
+                className="button secondary no-caps"
+                onClick={() => onLoad(entry)}
+              >
                 Load
               </button>
               <button
                 type="button"
-                className="btn btn-text btn-small"
+                className="button destructive no-caps"
                 onClick={() => onRemove(entry.id)}
                 aria-label={`Remove prompt from ${formatDate(entry.createdAt)}`}
               >

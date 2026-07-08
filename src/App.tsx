@@ -16,7 +16,6 @@ import type {
   PromptHistoryEntry,
   RefinementChange,
 } from "./types";
-import "./App.css";
 
 const FORM_ID = "prompt-builder-form";
 
@@ -112,7 +111,7 @@ export default function App() {
         />
 
         {!hasResult ? (
-          <form id={FORM_ID} className="builder-form" onSubmit={handleSubmit} noValidate>
+          <form id={FORM_ID} className="stack" onSubmit={handleSubmit} noValidate>
             <AgentTypeSelector value={agentType} onChange={handleAgentTypeChange} />
 
             {agentType === "aiko" ? (
@@ -122,19 +121,17 @@ export default function App() {
             )}
           </form>
         ) : (
-          <div className="results-view">
-            <RefinementResults
-              changes={changes}
-              refinedPrompt={refinedPrompt}
-              onPromptChange={setRefinedPrompt}
-            />
-          </div>
+          <RefinementResults
+            changes={changes}
+            refinedPrompt={refinedPrompt}
+            onPromptChange={setRefinedPrompt}
+          />
         )}
       </div>
 
       <footer className="app-footer">
         {!hasResult ? (
-          <button type="submit" form={FORM_ID} className="btn btn-primary btn-block">
+          <button type="submit" form={FORM_ID} className="button green no-caps button-full">
             Refine prompt
           </button>
         ) : (
@@ -144,7 +141,7 @@ export default function App() {
               content={refinedPrompt}
               disabled={refinedPrompt.trim().length === 0}
             />
-            <button type="button" className="btn btn-secondary" onClick={handleStartOver}>
+            <button type="button" className="button secondary no-caps" onClick={handleStartOver}>
               New prompt
             </button>
           </div>

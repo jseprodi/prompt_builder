@@ -5,18 +5,16 @@ export function HowItWorks() {
   const panelId = useId();
 
   return (
-    <div className="how-it-works">
+    <div className="section section-compact info blue">
       <button
         type="button"
-        className="collapse-trigger"
+        className="button secondary blue no-caps"
         aria-expanded={isOpen}
         aria-controls={panelId}
         onClick={() => setIsOpen((open) => !open)}
+        style={{ width: "100%" }}
       >
-        <span>How this works</span>
-        <span className="collapse-icon" aria-hidden="true">
-          {isOpen ? "−" : "+"}
-        </span>
+        {isOpen ? "Hide how this works" : "How this works"}
       </button>
 
       {isOpen ? (
@@ -30,22 +28,20 @@ export function HowItWorks() {
             <div>
               <dt>Aiko / Main Agent</dt>
               <dd>
-                For one-off or repeatable commands you run in the moment — bulk tagging, auditing,
-                translating, and similar pattern-based work across multiple items.
+                For one-off or repeatable commands — bulk tagging, auditing, translating, and
+                similar pattern-based work across multiple items.
               </dd>
             </div>
             <div>
               <dt>Expert Agent</dt>
               <dd>
-                For persistent agents configured with a goal and triggered by workflow events —
-                e.g., flagging issues before content reaches a publish step.
+                For persistent agents configured with a goal and triggered by workflow events.
               </dd>
             </div>
           </dl>
-          <p className="how-footnote">
-            Best-practice rules are built into the refinement engine and reflect Kontent.ai
-            guidance for effective AI prompts. The tool structures your input — it does not run the
-            agent for you.
+          <p className="muted">
+            Best-practice rules are built into the refinement engine. The tool structures your
+            input — it does not run the agent for you.
           </p>
         </div>
       ) : null}

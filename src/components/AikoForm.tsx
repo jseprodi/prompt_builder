@@ -14,9 +14,10 @@ const INTENT_OPTIONS: Array<{ value: AikoIntent; label: string }> = [
 
 export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
   const update = (patch: Partial<AikoFormData>) => onChange({ ...data, ...patch });
+  const disabledClass = disabled ? "disabled" : "";
 
   return (
-    <section className="input-form" aria-labelledby="aiko-form-heading">
+    <section className="stack" aria-labelledby="aiko-form-heading">
       <h2 id="aiko-form-heading" className="visually-hidden">
         Describe your Aiko command
       </h2>
@@ -29,6 +30,7 @@ export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
       >
         <input
           id="aiko-action"
+          className={`input input-full ${disabledClass}`}
           type="text"
           value={data.action}
           onChange={(e) => update({ action: e.target.value })}
@@ -46,6 +48,7 @@ export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
       >
         <textarea
           id="aiko-scope"
+          className={`input input-full ${disabledClass}`}
           value={data.contentScope}
           onChange={(e) => update({ contentScope: e.target.value })}
           placeholder="e.g., All Blog Post items in the Default collection created in the last 30 days"
@@ -63,6 +66,7 @@ export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
       >
         <select
           id="aiko-intent"
+          className={`input input-full ${disabledClass}`}
           value={data.intent}
           onChange={(e) => update({ intent: e.target.value as AikoIntent | "" })}
           disabled={disabled}
@@ -84,6 +88,7 @@ export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
       >
         <textarea
           id="aiko-draft"
+          className={`input input-full ${disabledClass}`}
           value={data.draft}
           onChange={(e) => update({ draft: e.target.value })}
           placeholder="Paste your rough prompt here…"

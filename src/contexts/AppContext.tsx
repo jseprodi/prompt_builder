@@ -54,8 +54,8 @@ export function AppContextProvider(props: { readonly children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="loading-screen" role="status" aria-live="polite">
-        <div className="spinner" aria-hidden="true" />
+      <div className="center-screen" role="status" aria-live="polite">
+        <div className="loader purple" aria-hidden="true" />
         <p>Loading Prompt Builder…</p>
       </div>
     );
@@ -63,18 +63,18 @@ export function AppContextProvider(props: { readonly children: ReactNode }) {
 
   if (error) {
     return (
-      <div className="error-screen" role="alert">
-        <h1>Unable to load app context</h1>
-        <p>{error}</p>
+      <div className="center-screen section section-compact info red" role="alert">
+        <h1 style={{ margin: 0, fontSize: "0.95rem" }}>Unable to load app context</h1>
+        <p className="muted">{error}</p>
       </div>
     );
   }
 
   if (!context) {
     return (
-      <div className="error-screen" role="alert">
-        <h1>Context unavailable</h1>
-        <p>This app must run inside Kontent.ai.</p>
+      <div className="center-screen section section-compact info red" role="alert">
+        <h1 style={{ margin: 0, fontSize: "0.95rem" }}>Context unavailable</h1>
+        <p className="muted">This app must run inside Kontent.ai.</p>
       </div>
     );
   }

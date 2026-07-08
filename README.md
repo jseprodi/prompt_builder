@@ -57,6 +57,8 @@ src/
   utils/          Export helpers
 ```
 
+Styling uses [`@kontent-ai/stylekit`](https://github.com/kontent-ai/stylesheet-generator) for buttons, inputs, sections, radios, and status pills that match the Kontent.ai UI. A small `index.css` layer handles dialog layout only (sticky footer, scrollable body).
+
 ## How refinement works
 
 The app validates your input against Kontent.ai best-practice rules, then assembles a structured Markdown prompt with the right sections for each agent type. A change checklist shows what was added, inferred from a draft, or flagged for review.

@@ -9,9 +9,10 @@ interface ExpertAgentFormProps {
 
 export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormProps) {
   const update = (patch: Partial<ExpertAgentFormData>) => onChange({ ...data, ...patch });
+  const disabledClass = disabled ? "disabled" : "";
 
   return (
-    <section className="input-form" aria-labelledby="expert-form-heading">
+    <section className="stack" aria-labelledby="expert-form-heading">
       <h2 id="expert-form-heading" className="visually-hidden">
         Configure your Expert Agent
       </h2>
@@ -24,6 +25,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
       >
         <input
           id="expert-goal"
+          className={`input input-full ${disabledClass}`}
           type="text"
           value={data.goal}
           onChange={(e) => update({ goal: e.target.value })}
@@ -41,6 +43,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
       >
         <input
           id="expert-trigger"
+          className={`input input-full ${disabledClass}`}
           type="text"
           value={data.trigger}
           onChange={(e) => update({ trigger: e.target.value })}
@@ -58,6 +61,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
       >
         <textarea
           id="expert-guardrails"
+          className={`input input-full ${disabledClass}`}
           value={data.guardrails}
           onChange={(e) => update({ guardrails: e.target.value })}
           placeholder="e.g., Only review Image elements on Article content types; never publish or change workflow step"
@@ -75,6 +79,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
       >
         <textarea
           id="expert-escalation"
+          className={`input input-full ${disabledClass}`}
           value={data.escalation}
           onChange={(e) => update({ escalation: e.target.value })}
           placeholder="e.g., Add a comment tagging the item owner and do not change content"
@@ -91,6 +96,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
       >
         <textarea
           id="expert-draft"
+          className={`input input-full ${disabledClass}`}
           value={data.draft}
           onChange={(e) => update({ draft: e.target.value })}
           placeholder="Paste your rough prompt here…"

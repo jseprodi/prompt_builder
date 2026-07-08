@@ -6,34 +6,30 @@ interface AgentTypeSelectorProps {
 }
 
 const OPTIONS: Array<{ value: AgentType; label: string }> = [
-  { value: "aiko", label: "Aiko" },
+  { value: "aiko", label: "Aiko / Main Agent" },
   { value: "expert", label: "Expert Agent" },
 ];
 
 export function AgentTypeSelector({ value, onChange }: AgentTypeSelectorProps) {
   return (
-    <fieldset className="agent-selector" aria-label="Choose agent type">
-      <legend className="section-title">Prompt for</legend>
-      <div className="agent-tabs" role="radiogroup" aria-label="Agent type">
+    <fieldset className="stack" aria-label="Choose agent type" style={{ border: "none", margin: 0, padding: 0 }}>
+      <legend className="subheading">Prompt for</legend>
+      <div className="agent-options" role="radiogroup" aria-label="Agent type">
         {OPTIONS.map((option) => {
           const inputId = `agent-type-${option.value}`;
-          const isSelected = value === option.value;
 
           return (
-            <label
-              key={option.value}
-              htmlFor={inputId}
-              className={`agent-tab${isSelected ? " is-selected" : ""}`}
-            >
+            <label key={option.value} className="radio" htmlFor={inputId}>
               <input
                 id={inputId}
                 type="radio"
                 name="agent-type"
                 value={option.value}
-                checked={isSelected}
+                checked={value === option.value}
                 onChange={() => onChange(option.value)}
               />
-              <span>{option.label}</span>
+              <span className="radio-button" />
+              {option.label}
             </label>
           );
         })}
