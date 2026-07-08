@@ -18,6 +18,8 @@ import type {
 } from "./types";
 import "./App.css";
 
+const FORM_ID = "prompt-builder-form";
+
 const EMPTY_AIKO: AikoFormData = {
   action: "",
   contentScope: "",
@@ -53,7 +55,7 @@ export default function App() {
   const [hasResult, setHasResult] = useState(false);
 
   useEffect(() => {
-    void setPopupSize({ unit: "px", value: 960 }, { unit: "px", value: 720 });
+    void setPopupSize({ unit: "px", value: 480 }, { unit: "px", value: 560 });
   }, []);
 
   const currentData = agentType === "aiko" ? aikoData : expertData;
@@ -94,62 +96,60 @@ export default function App() {
   };
 
   return (
-    <div className="app">
+    <div className="app-shell">
       <header className="app-header">
-        <div>
-          <h1>Prompt Builder</h1>
-          <p className="app-subtitle">
-            Write and refine prompts for Aiko and Expert Agents — then export to paste into Kontent.ai.
-          </p>
-        </div>
+        <h1>Prompt Builder</h1>
       </header>
 
-      <HowItWorks />
+      <div className="app-body">
+        <HowItWorks />
 
-      <PromptHistory
-        entries={entries}
-        onLoad={handleLoadHistory}
-        onRemove={removeEntry}
-        onClear={clearHistory}
-      />
+        <PromptHistory
+          entries={entries}
+          onLoad={handleLoadHistory}
+          onRemove={removeEntry}
+          onClear={clearHistory}
+        />
 
-      {!hasResult ? (
-        <form className="builder-form" onSubmit={handleSubmit} noValidate>
-          <AgentTypeSelector value={agentType} onChange={handleAgentTypeChange} />
+        {!hasResult ? (
+          <form id={FORM_ID} className="builder-form" onSubmit={handleSubmit} noValidate>
+            <AgentTypeSelector value={agentType} onChange={handleAgentTypeChange} />
 
-          {agentType === "aiko" ? (
-            <AikoForm data={aikoData} onChange={setAikoData} />
-          ) : (
-            <ExpertAgentForm data={expertData} onChange={setExpertData} />
-          )}
-
-          <div className="form-actions">
-            <button type="submit" className="btn btn-primary">
-              Refine prompt
-            </button>
+            {agentType === "aiko" ? (
+              <AikoForm data={aikoData} onChange={setAikoData} />
+            ) : (
+              <ExpertAgentForm data={expertData} onChange={setExpertData} />
+            )}
+          </form>
+        ) : (
+          <div className="results-view">
+            <RefinementResults
+              changes={changes}
+              refinedPrompt={refinedPrompt}
+              onPromptChange={setRefinedPrompt}
+            />
           </div>
-        </form>
-      ) : (
-        <div className="results-view">
-          <RefinementResults
-            changes={changes}
-            refinedPrompt={refinedPrompt}
-            onPromptChange={setRefinedPrompt}
-          />
+        )}
+      </div>
 
-          <ExportActions
-            agentType={agentType}
-            content={refinedPrompt}
-            disabled={refinedPrompt.trim().length === 0}
-          />
-
-          <div className="form-actions">
+      <footer className="app-footer">
+        {!hasResult ? (
+          <button type="submit" form={FORM_ID} className="btn btn-primary btn-block">
+            Refine prompt
+          </button>
+        ) : (
+          <div className="footer-actions">
+            <ExportActions
+              agentType={agentType}
+              content={refinedPrompt}
+              disabled={refinedPrompt.trim().length === 0}
+            />
             <button type="button" className="btn btn-secondary" onClick={handleStartOver}>
-              Start a new prompt
+              New prompt
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </footer>
     </div>
   );
 }

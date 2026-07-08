@@ -12,7 +12,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
 
   return (
     <section className="input-form" aria-labelledby="expert-form-heading">
-      <h2 id="expert-form-heading" className="section-title">
+      <h2 id="expert-form-heading" className="visually-hidden">
         Configure your Expert Agent
       </h2>
 
@@ -61,7 +61,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
           value={data.guardrails}
           onChange={(e) => update({ guardrails: e.target.value })}
           placeholder="e.g., Only review Image elements on Article content types; never publish or change workflow step"
-          rows={3}
+          rows={2}
           disabled={disabled}
           aria-describedby="expert-guardrails-hint"
         />
@@ -78,7 +78,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
           value={data.escalation}
           onChange={(e) => update({ escalation: e.target.value })}
           placeholder="e.g., Add a comment tagging the item owner and do not change content"
-          rows={3}
+          rows={2}
           disabled={disabled}
           aria-describedby="expert-escalation-hint"
         />
@@ -94,7 +94,7 @@ export function ExpertAgentForm({ data, onChange, disabled }: ExpertAgentFormPro
           value={data.draft}
           onChange={(e) => update({ draft: e.target.value })}
           placeholder="Paste your rough prompt here…"
-          rows={5}
+          rows={2}
           disabled={disabled}
           aria-describedby="expert-draft-hint"
         />

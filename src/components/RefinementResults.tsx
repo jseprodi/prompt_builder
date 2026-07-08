@@ -19,7 +19,7 @@ export function RefinementResults({
 }: RefinementResultsProps) {
   return (
     <section className="results-panel" aria-labelledby="results-heading">
-      <h2 id="results-heading" className="section-title">
+      <h2 id="results-heading" className="section-title section-title-compact">
         Refined prompt
       </h2>
 
@@ -51,7 +51,7 @@ export function RefinementResults({
           className="refined-output"
           value={refinedPrompt}
           onChange={(e) => onPromptChange(e.target.value)}
-          rows={16}
+          rows={6}
           aria-describedby="refined-prompt-hint"
         />
       </FormFieldWrapper>

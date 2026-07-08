@@ -17,7 +17,7 @@ export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
 
   return (
     <section className="input-form" aria-labelledby="aiko-form-heading">
-      <h2 id="aiko-form-heading" className="section-title">
+      <h2 id="aiko-form-heading" className="visually-hidden">
         Describe your Aiko command
       </h2>
 
@@ -49,7 +49,7 @@ export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
           value={data.contentScope}
           onChange={(e) => update({ contentScope: e.target.value })}
           placeholder="e.g., All Blog Post items in the Default collection created in the last 30 days"
-          rows={3}
+          rows={2}
           disabled={disabled}
           aria-describedby="aiko-scope-hint"
         />
@@ -87,7 +87,7 @@ export function AikoForm({ data, onChange, disabled }: AikoFormProps) {
           value={data.draft}
           onChange={(e) => update({ draft: e.target.value })}
           placeholder="Paste your rough prompt here…"
-          rows={5}
+          rows={2}
           disabled={disabled}
           aria-describedby="aiko-draft-hint"
         />

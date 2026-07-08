@@ -29,10 +29,10 @@ export function ExportActions({ agentType, content, disabled }: ExportActionsPro
   return (
     <div className="export-actions" aria-label="Export options">
       <button type="button" className="btn btn-secondary" onClick={() => void handleCopy()} disabled={disabled}>
-        Copy to clipboard
+        Copy
       </button>
       <button type="button" className="btn btn-primary" onClick={handleDownload} disabled={disabled}>
-        Export as Markdown
+        Export .md
       </button>
       {copyStatus ? (
         <p className="status-message" role="status" aria-live="polite">
