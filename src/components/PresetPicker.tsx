@@ -1,18 +1,36 @@
 import type { AgentType } from "../types";
+import type { ProjectContentType } from "../types/contentModel";
 import type { PromptPreset } from "../types/presets";
+import { rankPresetsForProject } from "../services/presets/matchPresets";
 
 interface PresetPickerProps {
   agentType: AgentType;
   presets: PromptPreset[];
+  projectContentTypes: ReadonlyArray<ProjectContentType>;
   selectedPresetId: string;
   onSelect: (presetId: string) => void;
 }
 
-export function PresetPicker({ agentType, presets, selectedPresetId, onSelect }: PresetPickerProps) {
-  const availablePresets = presets.filter((preset) => preset.agentType === agentType);
-  const selectedPreset = availablePresets.find((preset) => preset.id === selectedPresetId);
+function formatPresetLabel(preset: PromptPreset): string {
+  const customSuffix = preset.source === "config" ? " (custom)" : "";
+  return `${preset.label}${customSuffix}`;
+}
 
-  if (availablePresets.length === 0) {
+export function PresetPicker({
+  agentType,
+  presets,
+  projectContentTypes,
+  selectedPresetId,
+  onSelect,
+}: PresetPickerProps) {
+  const rankedPresets = rankPresetsForProject(presets, agentType, projectContentTypes);
+  const matchedPresets = rankedPresets.filter((entry) => entry.matchesProject);
+  const otherPresets = rankedPresets.filter((entry) => !entry.matchesProject);
+  const selectedEntry = rankedPresets.find((entry) => entry.preset.id === selectedPresetId);
+  const selectedPreset = selectedEntry?.preset;
+  const hasProjectMatches = matchedPresets.length > 0;
+
+  if (rankedPresets.length === 0) {
     return null;
   }
 
@@ -44,23 +62,43 @@ export function PresetPicker({ agentType, presets, selectedPresetId, onSelect }:
           onChange={(e) => onSelect(e.target.value)}
         >
           <option value="">Custom — fill in the form yourself</option>
-          {availablePresets.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.label}
-              {preset.source === "config" ? " (custom)" : ""}
-            </option>
-          ))}
+          {hasProjectMatches ? (
+            <optgroup label="Matches your content model">
+              {matchedPresets.map(({ preset }) => (
+                <option key={preset.id} value={preset.id}>
+                  {formatPresetLabel(preset)}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
+          {otherPresets.length > 0 ? (
+            <optgroup label={hasProjectMatches ? "Other templates" : "Templates"}>
+              {otherPresets.map(({ preset }) => (
+                <option key={preset.id} value={preset.id}>
+                  {formatPresetLabel(preset)}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
         </select>
       </label>
 
       {selectedPreset ? (
-        <p className="muted" id="preset-description">
-          {selectedPreset.description}
-        </p>
+        <div className="preset-description-row">
+          {selectedEntry?.matchesProject ? (
+            <span className="status ocean preset-match-badge">Matches your project</span>
+          ) : null}
+          <p className="muted" id="preset-description">
+            {selectedPreset.description}
+          </p>
+        </div>
       ) : (
         <p className="muted" id="preset-description">
           Pick a template to pre-fill the form, then customize placeholders like [Content type] before
           refining.
+          {hasProjectMatches
+            ? " Templates marked as matching your project are listed first."
+            : null}
         </p>
       )}
     </section>

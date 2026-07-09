@@ -9,6 +9,7 @@ import { PresetPicker } from "./components/PresetPicker";
 import { PromptHistory } from "./components/PromptHistory";
 import { RefinementResults } from "./components/RefinementResults";
 import { useAppConfig } from "./contexts/AppContext";
+import { useProjectContentTypes } from "./hooks/useProjectContentTypes";
 import { usePromptHistory } from "./hooks/usePromptHistory";
 import { applyPreset, createEmptyFormData, getPresets } from "./services/presets/getPresets";
 import { refinePrompt } from "./services/refinement/refinePrompt";
@@ -33,6 +34,7 @@ function historyLabel(agentType: AgentType, data: AikoFormData | ExpertAgentForm
 
 export default function App() {
   const appConfig = useAppConfig();
+  const { contentTypes: projectContentTypes } = useProjectContentTypes();
   const presets = useMemo(() => getPresets(appConfig), [appConfig]);
   const { entries, addEntry, removeEntry, clearHistory } = usePromptHistory();
 
@@ -150,6 +152,7 @@ export default function App() {
             <PresetPicker
               agentType={agentType}
               presets={presets}
+              projectContentTypes={projectContentTypes}
               selectedPresetId={selectedPresetId}
               onSelect={handlePresetSelect}
             />

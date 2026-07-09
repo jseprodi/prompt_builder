@@ -2,11 +2,28 @@ import type {
   AgentType,
   AikoFormData,
   AikoIntent,
+  ChangeStatus,
+  ClientValidationIssue,
   ExpertAgentFormData,
   RefinementChange,
+  RefinementChangeKind,
   RefinementResult,
 } from "../../types";
+import type { RefinementRuleId } from "../../types/refinement";
 import { validateInput } from "./validate";
+
+function makeChange(
+  ruleId: RefinementRuleId,
+  kind: RefinementChangeKind,
+  status: ChangeStatus,
+  message: string,
+): RefinementChange {
+  return { ruleId, kind, status, message };
+}
+
+function issueToChange(issue: ClientValidationIssue): RefinementChange {
+  return makeChange(issue.ruleId, "flagged", issue.severity, issue.message);
+}
 
 const CREATIVE_TASK_PATTERNS = [
   /\bwrite\s+(a|an)\s+/i,
@@ -220,50 +237,87 @@ function buildAikoChanges(
   fields: ReturnType<typeof resolveAikoFields>,
   issues: ReturnType<typeof validateInput>,
 ): RefinementChange[] {
-  const changes: RefinementChange[] = issues.map((issue) => ({
-    status: issue.severity,
-    message: issue.message,
-  }));
+  const changes: RefinementChange[] = issues.map(issueToChange);
 
   if (!isBlank(data.action)) {
-    changes.push({ status: "success", message: "Structured action into a clear verb-first statement." });
+    changes.push(
+      makeChange(
+        "AIKO_ACTION_STRUCTURED",
+        "added",
+        "success",
+        "Structured action into a clear verb-first statement.",
+      ),
+    );
   } else if (fields.usedDraft) {
-    changes.push({
-      status: "warning",
-      message: "Action inferred from draft — confirm the wording is correct.",
-    });
+    changes.push(
+      makeChange(
+        "AIKO_ACTION_INFERRED",
+        "inferred",
+        "warning",
+        "Action inferred from draft — confirm the wording is correct.",
+      ),
+    );
   }
 
   if (!isBlank(data.contentScope)) {
-    changes.push({ status: "success", message: "Added explicit content scope." });
+    changes.push(
+      makeChange(
+        "AIKO_SCOPE_EXPLICIT",
+        "added",
+        "success",
+        "Added explicit content scope.",
+      ),
+    );
   } else if (fields.usedDraft) {
-    changes.push({
-      status: "warning",
-      message: "Content scope could not be fully parsed from draft — review and tighten scope language.",
-    });
+    changes.push(
+      makeChange(
+        "AIKO_SCOPE_INFERRED",
+        "inferred",
+        "warning",
+        "Content scope could not be fully parsed from draft — review and tighten scope language.",
+      ),
+    );
   }
 
   if (data.intent !== "") {
-    changes.push({ status: "success", message: `Clarified intent: ${data.intent === "suggest" ? "suggest, don't act" : "take permitted action"}.` });
+    changes.push(
+      makeChange(
+        "AIKO_INTENT_CLARIFIED",
+        "added",
+        "success",
+        `Clarified intent: ${data.intent === "suggest" ? "suggest, don't act" : "take permitted action"}.`,
+      ),
+    );
   } else if (fields.defaultedIntent) {
-    changes.push({
-      status: "warning",
-      message: "Intent was ambiguous — defaulted to 'suggest, don't act'; confirm this is correct.",
-    });
+    changes.push(
+      makeChange(
+        "AIKO_INTENT_DEFAULTED",
+        "inferred",
+        "warning",
+        "Intent was ambiguous — defaulted to 'suggest, don't act'; confirm this is correct.",
+      ),
+    );
   }
 
-  changes.push({
-    status: "success",
-    message: "Added workflow constraints reinforcing human approval.",
-  });
+  changes.push(
+    makeChange(
+      "AIKO_HUMAN_APPROVAL",
+      "added",
+      "success",
+      "Added workflow constraints reinforcing human approval.",
+    ),
+  );
 
   const sourceText = [data.action, data.contentScope, data.draft].filter(Boolean).join(" ");
   if (looksLikeCreativeTask(sourceText)) {
-    changes.push({
-      status: "info",
-      message:
+    changes.push(
+      makeChange(
+        "AIKO_CREATIVE_TASK_FIT",
+        "flagged",
+        "info",
         "This looks like a one-off creative task — Aiko works best for repetitive, pattern-based work across multiple items.",
-    });
+      ),
+    );
   }
 
   return changes;
@@ -274,65 +328,117 @@ function buildExpertChanges(
   fields: ReturnType<typeof resolveExpertFields>,
   issues: ReturnType<typeof validateInput>,
 ): RefinementChange[] {
-  const changes: RefinementChange[] = issues.map((issue) => ({
-    status: issue.severity,
-    message: issue.message,
-  }));
+  const changes: RefinementChange[] = issues.map(issueToChange);
 
   if (!isBlank(data.goal)) {
-    changes.push({ status: "success", message: "Focused goal into a single-purpose statement." });
+    changes.push(
+      makeChange(
+        "EXPERT_GOAL_STRUCTURED",
+        "added",
+        "success",
+        "Focused goal into a single-purpose statement.",
+      ),
+    );
   } else if (fields.usedDraft) {
-    changes.push({
-      status: "warning",
-      message: "Goal inferred from draft — confirm it describes one job only.",
-    });
+    changes.push(
+      makeChange(
+        "EXPERT_GOAL_INFERRED",
+        "inferred",
+        "warning",
+        "Goal inferred from draft — confirm it describes one job only.",
+      ),
+    );
   }
 
   if (!isBlank(data.trigger)) {
-    changes.push({ status: "success", message: "Defined the workflow trigger." });
+    changes.push(
+      makeChange(
+        "EXPERT_TRIGGER_DEFINED",
+        "added",
+        "success",
+        "Defined the workflow trigger.",
+      ),
+    );
   } else if (fields.usedDraft) {
-    changes.push({
-      status: "warning",
-      message: "Trigger not found in draft — add the workflow event that activates this agent.",
-    });
+    changes.push(
+      makeChange(
+        "EXPERT_TRIGGER_INFERRED",
+        "flagged",
+        "warning",
+        "Trigger not found in draft — add the workflow event that activates this agent.",
+      ),
+    );
   }
 
   if (!isBlank(data.guardrails)) {
-    changes.push({ status: "success", message: "Documented scope and guardrails." });
+    changes.push(
+      makeChange(
+        "EXPERT_GUARDRAILS_DOCUMENTED",
+        "added",
+        "success",
+        "Documented scope and guardrails.",
+      ),
+    );
   } else {
-    changes.push({
-      status: "warning",
-      message: "Applied default guardrails — customize permission boundaries as needed.",
-    });
+    changes.push(
+      makeChange(
+        "EXPERT_GUARDRAILS_DEFAULTED",
+        "flagged",
+        "warning",
+        "Applied default guardrails — customize permission boundaries as needed.",
+      ),
+    );
   }
 
   if (!isBlank(data.escalation)) {
-    changes.push({ status: "success", message: "Defined fallback behavior for ambiguous cases." });
+    changes.push(
+      makeChange(
+        "EXPERT_ESCALATION_DEFINED",
+        "added",
+        "success",
+        "Defined fallback behavior for ambiguous cases.",
+      ),
+    );
   } else {
-    changes.push({
-      status: "warning",
-      message: "Applied default fallback — specify what happens when the agent is unsure.",
-    });
+    changes.push(
+      makeChange(
+        "EXPERT_ESCALATION_DEFAULTED",
+        "flagged",
+        "warning",
+        "Applied default fallback — specify what happens when the agent is unsure.",
+      ),
+    );
   }
 
-  changes.push({
-    status: "success",
-    message: "Added human-in-the-loop reminder about approvals and publishing.",
-  });
+  changes.push(
+    makeChange(
+      "EXPERT_HUMAN_OVERSIGHT",
+      "added",
+      "success",
+      "Added human-in-the-loop reminder about approvals and publishing.",
+    ),
+  );
 
   if (hasTechnicalJargon(data.goal || data.draft)) {
-    changes.push({
-      status: "info",
-      message: "Goal contains technical language — consider describing outcomes instead of implementation.",
-    });
+    changes.push(
+      makeChange(
+        "EXPERT_GOAL_JARGON",
+        "flagged",
+        "info",
+        "Goal contains technical language — consider describing outcomes instead of implementation.",
+      ),
+    );
   }
 
   if (hasItemSpecificDetails(data.goal)) {
-    changes.push({
-      status: "warning",
-      message:
+    changes.push(
+      makeChange(
+        "EXPERT_GOAL_ITEM_SPECIFIC",
+        "flagged",
+        "warning",
         "Goal may include item-specific details — move dates, names, or IDs to trigger conditions or knowledge sources.",
-    });
+      ),
+    );
   }
 
   return changes;

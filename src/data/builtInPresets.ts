@@ -7,6 +7,8 @@ export const BUILT_IN_PRESETS: PromptPreset[] = [
     description: "Suggest taxonomy terms for a batch of items so you can review and apply them.",
     agentType: "aiko",
     source: "built-in",
+    contentTypes: ["article", "blog_post", "news", "page"],
+    useCases: ["taxonomy", "bulk-operations"],
     aiko: {
       action: "Tag items with the correct taxonomy terms",
       contentScope:
@@ -33,6 +35,8 @@ export const BUILT_IN_PRESETS: PromptPreset[] = [
     description: "Find image elements without alt text across a content scope.",
     agentType: "aiko",
     source: "built-in",
+    contentTypes: ["article", "blog_post", "page", "landing_page"],
+    useCases: ["accessibility", "images"],
     aiko: {
       action: "Audit items for missing or low-quality alt text on images",
       contentScope:
@@ -58,6 +62,8 @@ export const BUILT_IN_PRESETS: PromptPreset[] = [
     description: "Persistent agent that flags image elements before content reaches publish.",
     agentType: "expert",
     source: "built-in",
+    contentTypes: ["article", "blog_post", "page", "landing_page"],
+    useCases: ["accessibility", "images"],
     expert: {
       goal: "Flag content with missing or inadequate alt text before it is ready to publish",
       trigger: "When an item moves to the Review workflow step",
@@ -73,6 +79,8 @@ export const BUILT_IN_PRESETS: PromptPreset[] = [
     description: "Ensures required SEO and metadata fields are filled before approval.",
     agentType: "expert",
     source: "built-in",
+    contentTypes: ["article", "blog_post", "news", "page", "landing_page"],
+    useCases: ["seo", "metadata"],
     expert: {
       goal: "Ensure required metadata and SEO fields are complete before content is approved",
       trigger: "When an item moves to the Ready to publish workflow step",

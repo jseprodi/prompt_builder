@@ -1,5 +1,10 @@
 import type { RefinementChange } from "../types";
 import { FormField } from "./FormField";
+import { groupChangesByCategory } from "../services/refinement/groupChanges";
+import {
+  CHANGE_KIND_LABELS,
+  getRefinementRule,
+} from "../services/refinement/ruleRegistry";
 
 interface RefinementResultsProps {
   changes: RefinementChange[];
@@ -13,32 +18,77 @@ const STATUS_CLASS: Record<RefinementChange["status"], string> = {
   info: "status blue",
 };
 
+const KIND_STATUS_LABEL: Record<RefinementChange["kind"], string> = {
+  added: "OK",
+  inferred: "~",
+  flagged: "!",
+};
+
+function ChangeItem({ change }: { readonly change: RefinementChange }) {
+  const rule = getRefinementRule(change.ruleId);
+
+  return (
+    <li className="change-item">
+      <span
+        className={STATUS_CLASS[change.status]}
+        title={CHANGE_KIND_LABELS[change.kind]}
+        aria-label={CHANGE_KIND_LABELS[change.kind]}
+      >
+        {KIND_STATUS_LABEL[change.kind]}
+      </span>
+      <div className="change-body">
+        <div className="change-header">
+          <span className="change-kind">{CHANGE_KIND_LABELS[change.kind]}</span>
+          <span className="change-rule-name">{rule.name}</span>
+        </div>
+        <p className="change-explanation">{rule.explanation}</p>
+        <p className="change-detail">{change.message}</p>
+        {rule.docUrl ? (
+          <a className="change-doc-link" href={rule.docUrl} target="_blank" rel="noreferrer">
+            Learn more in Kontent.ai docs
+          </a>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
 export function RefinementResults({
   changes,
   refinedPrompt,
   onPromptChange,
 }: RefinementResultsProps) {
+  const groupedChanges = groupChangesByCategory(changes);
+
   return (
     <section className="section section-compact stack" aria-labelledby="results-heading">
       <h2 id="results-heading" className="subheading">
         Refined prompt
       </h2>
 
-      {changes.length > 0 ? (
+      {groupedChanges.length > 0 ? (
         <div aria-labelledby="changes-heading">
           <h3 id="changes-heading" className="subheading">
             What changed
           </h3>
-          <ul className="changes-list">
-            {changes.map((change, index) => (
-              <li key={`${change.status}-${index}`} className="change-item">
-                <span className={STATUS_CLASS[change.status]} aria-hidden="true">
-                  {change.status === "success" ? "OK" : change.status === "warning" ? "!" : "i"}
-                </span>
-                <span>{change.message}</span>
-              </li>
+          <div className="changes-groups">
+            {groupedChanges.map((group) => (
+              <section
+                key={group.category}
+                className="changes-group"
+                aria-labelledby={`changes-${group.category}`}
+              >
+                <h4 id={`changes-${group.category}`} className="changes-group-heading">
+                  {group.category}
+                </h4>
+                <ul className="changes-list">
+                  {group.changes.map((change) => (
+                    <ChangeItem key={`${change.ruleId}-${change.message}`} change={change} />
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         </div>
       ) : null}
 

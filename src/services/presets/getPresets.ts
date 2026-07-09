@@ -30,6 +30,19 @@ function isAikoIntent(value: unknown): value is AikoPresetFields["intent"] {
   return value === "suggest" || value === "act";
 }
 
+function parseStringArray(raw: unknown): string[] | undefined {
+  if (!Array.isArray(raw)) {
+    return undefined;
+  }
+
+  const values = raw
+    .filter((entry): entry is string => typeof entry === "string")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  return values.length > 0 ? values : undefined;
+}
+
 function parseAikoFields(raw: unknown): AikoPresetFields | null {
   if (!raw || typeof raw !== "object") {
     return null;
@@ -106,6 +119,9 @@ function parseConfigPreset(raw: unknown, index: number): PromptPreset | null {
     description,
     agentType,
     source: "config",
+    contentTypes: parseStringArray(entry.contentTypes),
+    contentTypeIds: parseStringArray(entry.contentTypeIds),
+    useCases: parseStringArray(entry.useCases),
     aiko: aikoFields ?? undefined,
     expert: expertFields ?? undefined,
   };

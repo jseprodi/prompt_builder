@@ -19,8 +19,13 @@ export interface ExpertAgentFormData {
 
 export type ChangeStatus = "success" | "warning" | "info";
 
+export type { RefinementChangeKind, RefinementRuleId, RuleCategory } from "./refinement";
+import type { RefinementChangeKind, RefinementRuleId } from "./refinement";
+
 export interface RefinementChange {
   status: ChangeStatus;
+  ruleId: RefinementRuleId;
+  kind: RefinementChangeKind;
   message: string;
 }
 
@@ -41,4 +46,5 @@ export interface ClientValidationIssue {
   field: string;
   message: string;
   severity: ChangeStatus;
+  ruleId: RefinementRuleId;
 }
