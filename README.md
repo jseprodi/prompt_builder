@@ -7,6 +7,7 @@ No external API or LLM is required — refinement runs entirely in the browser.
 ## What it does
 
 - **Two modes** — Aiko (ad-hoc commands) and Expert Agent (persistent, trigger-based agents), each with its own guided form and validation rules.
+- **Template library** — start from built-in presets (bulk tagging, alt-text audit, metadata checks, and more) or add custom templates via the custom app Config JSON.
 - **Rule-based refinement** — structures your input into Markdown and shows a checklist of what was missing, inferred, or improved.
 - **Export** — download `{agent-type}-prompt-{yyyy-mm-dd}.md` or copy to clipboard.
 - **Local history** — keeps the last 10 refined prompts in browser storage (not synced).
@@ -26,7 +27,32 @@ After deploying, add the hosted URL under **Environment settings → Custom apps
 5. Choose **Full screen** or **Dialog** display mode.
 6. Save and open the app from the left-hand custom apps menu.
 
-No configuration JSON or API keys are needed.
+No configuration JSON is required. Optionally, add custom templates via Config JSON (see below).
+
+## Custom templates (optional)
+
+Admins can add environment-specific templates in **Environment settings → Custom apps → Config**:
+
+```json
+{
+  "templates": [
+    {
+      "id": "our-seo-audit",
+      "label": "SEO audit on review",
+      "description": "Flags missing meta descriptions when articles reach review.",
+      "agentType": "expert",
+      "expert": {
+        "goal": "Flag articles missing meta descriptions before they reach Ready to publish",
+        "trigger": "When an item moves to the Review workflow step",
+        "guardrails": "Only review SEO elements on Article content types; do not publish",
+        "escalation": "Add a comment listing missing fields; do not change content"
+      }
+    }
+  ]
+}
+```
+
+Use `agentType: "aiko"` with an `aiko` object (`action`, `contentScope`, `intent`, optional `draft`) for Aiko templates. Built-in templates are always available; config templates are merged in and labeled "(custom)" in the picker.
 
 ## Local development
 
@@ -48,10 +74,12 @@ npm run preview
 
 ```
 src/
-  components/     UI (forms, export, history)
+  components/     UI (forms, export, history, preset picker)
   contexts/       Kontent.ai SDK context hook
+  data/           Built-in prompt templates
   hooks/          Browser localStorage history
   services/
+    presets/      Template loading and form pre-fill
     refinement/   Validation, prompt building, best-practice checks
   types/          Shared TypeScript types
   utils/          Export helpers

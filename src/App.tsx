@@ -1,13 +1,16 @@
 import { setPopupSize } from "@kontent-ai/custom-app-sdk";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AgentTypeSelector } from "./components/AgentTypeSelector";
 import { AikoForm } from "./components/AikoForm";
 import { ExpertAgentForm } from "./components/ExpertAgentForm";
 import { ExportActions } from "./components/ExportActions";
 import { HowItWorks } from "./components/HowItWorks";
+import { PresetPicker } from "./components/PresetPicker";
 import { PromptHistory } from "./components/PromptHistory";
 import { RefinementResults } from "./components/RefinementResults";
+import { useAppConfig } from "./contexts/AppContext";
 import { usePromptHistory } from "./hooks/usePromptHistory";
+import { applyPreset, createEmptyFormData, getPresets } from "./services/presets/getPresets";
 import { refinePrompt } from "./services/refinement/refinePrompt";
 import type {
   AgentType,
@@ -19,21 +22,6 @@ import type {
 
 const FORM_ID = "prompt-builder-form";
 
-const EMPTY_AIKO: AikoFormData = {
-  action: "",
-  contentScope: "",
-  intent: "",
-  draft: "",
-};
-
-const EMPTY_EXPERT: ExpertAgentFormData = {
-  goal: "",
-  trigger: "",
-  guardrails: "",
-  escalation: "",
-  draft: "",
-};
-
 function historyLabel(agentType: AgentType, data: AikoFormData | ExpertAgentFormData): string {
   if (agentType === "aiko") {
     const aiko = data as AikoFormData;
@@ -44,11 +32,16 @@ function historyLabel(agentType: AgentType, data: AikoFormData | ExpertAgentForm
 }
 
 export default function App() {
+  const appConfig = useAppConfig();
+  const presets = useMemo(() => getPresets(appConfig), [appConfig]);
   const { entries, addEntry, removeEntry, clearHistory } = usePromptHistory();
 
   const [agentType, setAgentType] = useState<AgentType>("aiko");
-  const [aikoData, setAikoData] = useState<AikoFormData>(EMPTY_AIKO);
-  const [expertData, setExpertData] = useState<ExpertAgentFormData>(EMPTY_EXPERT);
+  const [selectedPresetId, setSelectedPresetId] = useState("");
+  const [aikoData, setAikoData] = useState<AikoFormData>(() => createEmptyFormData("aiko") as AikoFormData);
+  const [expertData, setExpertData] = useState<ExpertAgentFormData>(
+    () => createEmptyFormData("expert") as ExpertAgentFormData,
+  );
   const [refinedPrompt, setRefinedPrompt] = useState("");
   const [changes, setChanges] = useState<RefinementChange[]>([]);
   const [hasResult, setHasResult] = useState(false);
@@ -59,11 +52,49 @@ export default function App() {
 
   const currentData = agentType === "aiko" ? aikoData : expertData;
 
-  const handleAgentTypeChange = (nextType: AgentType) => {
-    setAgentType(nextType);
+  const resetForm = (nextAgentType: AgentType) => {
+    setAikoData(createEmptyFormData("aiko") as AikoFormData);
+    setExpertData(createEmptyFormData("expert") as ExpertAgentFormData);
+    setSelectedPresetId("");
+    setAgentType(nextAgentType);
     setHasResult(false);
     setRefinedPrompt("");
     setChanges([]);
+  };
+
+  const handleAgentTypeChange = (nextType: AgentType) => {
+    if (nextType === agentType) {
+      return;
+    }
+    resetForm(nextType);
+  };
+
+  const handlePresetSelect = (presetId: string) => {
+    setSelectedPresetId(presetId);
+    setHasResult(false);
+    setRefinedPrompt("");
+    setChanges([]);
+
+    if (!presetId) {
+      if (agentType === "aiko") {
+        setAikoData(createEmptyFormData("aiko") as AikoFormData);
+      } else {
+        setExpertData(createEmptyFormData("expert") as ExpertAgentFormData);
+      }
+      return;
+    }
+
+    const preset = presets.find((entry) => entry.id === presetId);
+    if (!preset || preset.agentType !== agentType) {
+      return;
+    }
+
+    const applied = applyPreset(preset);
+    if (agentType === "aiko") {
+      setAikoData(applied.aiko);
+    } else {
+      setExpertData(applied.expert);
+    }
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -78,6 +109,7 @@ export default function App() {
 
   const handleLoadHistory = (entry: PromptHistoryEntry) => {
     setAgentType(entry.agentType);
+    setSelectedPresetId("");
     setRefinedPrompt(entry.refinedPrompt);
     setChanges([]);
     setHasResult(true);
@@ -87,10 +119,11 @@ export default function App() {
     setHasResult(false);
     setRefinedPrompt("");
     setChanges([]);
+    setSelectedPresetId("");
     if (agentType === "aiko") {
-      setAikoData(EMPTY_AIKO);
+      setAikoData(createEmptyFormData("aiko") as AikoFormData);
     } else {
-      setExpertData(EMPTY_EXPERT);
+      setExpertData(createEmptyFormData("expert") as ExpertAgentFormData);
     }
   };
 
@@ -113,6 +146,13 @@ export default function App() {
         {!hasResult ? (
           <form id={FORM_ID} className="stack" onSubmit={handleSubmit} noValidate>
             <AgentTypeSelector value={agentType} onChange={handleAgentTypeChange} />
+
+            <PresetPicker
+              agentType={agentType}
+              presets={presets}
+              selectedPresetId={selectedPresetId}
+              onSelect={handlePresetSelect}
+            />
 
             {agentType === "aiko" ? (
               <AikoForm data={aikoData} onChange={setAikoData} />
